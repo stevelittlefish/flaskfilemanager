@@ -33,7 +33,7 @@ logged in from accessing it, do the following:
 ```
 def my_access_control_function():
 	"""
-	:return: True if the useris allowed to access the filemanager, otherwise False
+	:return: True if the user is allowed to access the filemanager, otherwise False
 	"""
 	# You can do whatever permission check you need here
 	return 'logged_in' in session and session['role'] == 'admin'
@@ -50,7 +50,7 @@ To generate links to the filemanager:
 
 ```python
 filemanager_link = url_for('flaskfilemanager.index')
-file_download_link = url_for('flaskfilemanager.userfile, filename='/my_folder/uploaded_file.txt')
+file_download_link = url_for('flaskfilemanager.userfile', filename='/my_folder/uploaded_file.txt')
 ```
 
 ## TODO: ckeditor integration
