@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Error - {{ title }}{% endblock title %}
+
+{% block content %}
+	<br><br>
+
+	<div class="alert alert-danger">
+		{% if title %}
+			<h1>{{ title }}</h1>
+			<hr>
+		{% endif %}
+		
+		{% if message %}
+			{% if preformat is defined and preformat %}
+				<pre>{{ message }}</pre>
+			{% else %}
+				{{ message }}
+			{% endif %}
+		{% else %}
+			(no error message)
+		{% endif %}
+	</div>
+{% endblock content %}

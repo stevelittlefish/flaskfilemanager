@@ -1,0 +1,53 @@
+{% macro format_result(result) %}
+	{% set val = ('%s' % result).lower() %}
+	{% if val == 'yes' or val == 'true' %}
+		<strong class="green">{{ result }}</strong>
+	{% elif val == 'no' or val == 'false' %}
+		<strong class="red">{{ result }}</strong>
+	{% elif val == 'female' %}
+		<span class="female">{{ result }}</span>
+	{% elif val == 'male' %}
+		<span class="male">{{ result }}</span>
+	{% elif result == None %}
+		<span class="info">(none)</span>
+	{% else %}
+		{{ result }}
+	{% endif %}
+{% endmacro %}
+
+
+{% macro render_dict(dict) %}
+	<table class="fields table-bordered">
+		<tbody>
+			{% for key in dict %}
+				<tr>
+					<td>{{ key }}</td>
+					<td>
+						{{ render_value(dict[key]) }}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endmacro %}
+
+
+{% macro render_value(value) %}
+	{% if value is none %}
+		<span class="info">None</span>
+	{% elif value is string %}
+		{{ value }}
+	{% elif value is mapping %}
+		{{ render_dict(value) }}
+	{% elif value is sequence %}
+		{% for v in value %}
+			{{ render_value(v) }}
+			{% if not loop.last %}
+				<hr>
+			{% endif %}
+		{% endfor %}
+	{% else %}
+		{{ format_result(value) }}
+	{% endif %}
+{% endmacro %}
+

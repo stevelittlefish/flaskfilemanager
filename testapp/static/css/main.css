@@ -1,0 +1,117 @@
+body {
+	padding-top: 50px;
+}
+
+h1 {
+	text-align: center;
+	margin: 50px 0 40px;
+}
+
+h2 {
+	margin: 40px 0 30px;
+}
+
+.not-too-big {
+	max-width: 700px;
+}
+
+.centered {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.info {
+	font-style: italic;
+	color: #888;
+}
+
+.red {
+	color: #dd0000;
+}
+
+.green {
+	color: #007700;
+}
+
+td {
+	padding-right: 5px;
+}
+
+table.fields {
+	clear: both;
+	width: 100%;
+}
+
+table.fields > thead > tr > th,
+table.fields > tbody > tr > td,
+table.fields > tfoot > tr > td {
+	padding: 6px 8px;
+	line-height: 1.428571429;
+	vertical-align: top;
+	border-top: 1px solid #ddd;
+	background: white;
+}
+
+table.fields > thead:first-child > tr:first-child > th,
+table.fields > tbody:first-child > tr:first-child > td {
+	border-top: 0;
+}
+
+table.fields.table-bordered > thead:first-child > tr:first-child > th {
+	border-top: 1px solid #ddd;
+}
+
+table.fields > thead > tr > th {
+	vertical-align: bottom;
+	border-bottom: 2px solid #ddd;
+}
+
+table.fields > thead > tr > th:first-child,
+table.fields > tbody > tr > th:first-child,
+table.fields > tfoot > tr > th:first-child,
+table.fields > thead > tr > td:first-child,
+table.fields > tbody > tr > td:first-child,
+table.fields > tfoot > tr > td:first-child {
+	background-color: #ececfd;
+	border-right: 2px solid #4d7496;
+	border-top: 1px solid #ccc;
+	width: 25%;
+}
+
+table.fields > thead > tr > th:first-child {
+	vertical-align: bottom;
+	border-bottom: 2px solid #ccc;
+}
+
+table.fields.table-bordered > tbody > tr > td:first-child {
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+}
+
+table.fields.table-bordered > thead:first-child > tr:first-child > th:first-child,
+table.fields.table-bordered > tbody:first-child > tr:first-child > td:first-child {
+	border-left: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+}
+
+table.fields > tbody > tr:hover > td {
+	background-color: #ddddee !important;
+}
+
+ul.links, ul.list {
+	padding-left: 0;
+}
+
+ul.links li, ul.list li {
+	list-style: none;
+	padding: 4px 0;
+}
+
+.main-panel {
+	max-width: 800px;
+	margin: 50px auto 15px;
+}
+
+.panel-heading h1 {
+	margin: 10px 0;
+}

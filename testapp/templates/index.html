@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Flask Filemanager Test App{% endblock %}
+
+{% block h1 %}{% endblock %}
+
+{% block content %}
+	<div class="main-panel panel panel-default">
+		<div class="panel-heading">
+			<h1>{{ self.title() }}</h1>
+		</div>
+		<div class="panel-body">
+			<p>
+				The bulk of the work here is RichFilemanager, available here:
+				<a href="https://github.com/servocoder/RichFilemanager">RichFilemanager on GitHub</a>
+			</p>
+
+			<ul class="links">
+				<li>
+					<a href="{{ url_for('flaskfilemanager.index') }}">
+						File Manager
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+{% endblock %}
+

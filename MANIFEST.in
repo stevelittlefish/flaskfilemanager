@@ -1,0 +1,5 @@
+# Misc
+include LICENSE.txt
+
+# Templates for forms library
+recursive-include easyforms/templates *

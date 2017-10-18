@@ -1,0 +1,10 @@
+.ropeproject
+*.pyc
+MANIFEST
+dist
+*.swp
+flaskfilemanager.egg-info
+env
+out.log
+tmp-webapp-uploads
+
