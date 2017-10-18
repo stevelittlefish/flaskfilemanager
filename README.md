@@ -8,6 +8,9 @@ to your project.
 To use this in your project basically do the following:
 
 ```python
+from flask import Flask
+import flaskfilemanager
+
 # Create the webapp
 app = Flask(__name__)
 
