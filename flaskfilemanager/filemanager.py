@@ -56,6 +56,10 @@ def init(app, register_blueprint=True, url_prefix='/fm', access_control_function
         app.register_blueprint(filemanager_blueprint, url_prefix=url_prefix)
 
 
+def get_root_path():
+    return _FILE_PATH
+
+
 def json_to_response(json_data, mime_type='application/json'):
     log.debug(json_data)
     response = make_response(json_data)
