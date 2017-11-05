@@ -99,7 +99,8 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 			logMaxItems: 5,
 			logPosition: 'bottom right',
 			logContainerClass: 'fm-log',
-			parent: $('.fm-popup').is(':visible') ? document.body : $fileinfo[0],
+            logMessageTemplate: null,
+			parent: document.body,
 			onClick: undefined,
 			unique: false,
 			type: 'log'
@@ -111,13 +112,16 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 		}
 
 		if(options.reset) log.reset();
-		if(options.parent) log.parent(options.parent);
+		log.parent(options.parent);
 		log.logDelay(options.delay);
 		log.logMaxItems(options.logMaxItems);
 		log.logPosition(options.logPosition);
 		log.logContainerClass(options.logContainerClass);
+		log.logMessageTemplate(options.logMessageTemplate);
 		log[options.type](message, options.onClick);
-		return log;
+
+		var logs = log.getLogs();
+		return logs[logs.length-1];
 	};
 
 	fm.error = function(message, options) {
@@ -618,11 +622,6 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 			};
 		}
 
-		// input file replacement
-		$("#newfile").change(function() {
-			$("#filepath").val($(this).val().replace(/.+[\\\/]/, ""));
-		});
-
         prepareFileTree();
         prepareFileView();
         setupUploader();
@@ -934,6 +933,15 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
                     viewerObject.options = {
                         width: config.viewer.video.playerWidth,
                         height: config.viewer.video.playerHeight
+                    };
+                }
+                if(isOnlyOfficeFile(filename) && config.viewer.onlyoffice.enabled === true) {
+                    viewerObject.type = 'onlyoffice';
+                    var connectorUrl = config.viewer.onlyoffice.connectorUrl || fm.settings.baseUrl + '/connectors/php/onlyoffice/editor.php';
+                    viewerObject.url = connectorUrl + '?path=' + encodeURIComponent(resourceObject.attributes.path);
+                    viewerObject.options = {
+                        width: config.viewer.onlyoffice.editorWidth,
+                        height: config.viewer.onlyoffice.editorHeight
                     };
                 }
                 if(isOpenDocFile(filename) && config.viewer.opendoc.enabled === true) {
@@ -1924,6 +1932,10 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 			this.displayGrid = function() {
 				model.viewMode('grid');
 				model.previewFile(false);
+
+                if (model.itemsModel.lazyLoad) {
+                    model.itemsModel.lazyLoad.update();
+                }
 			};
 
 			this.displayList = function() {
@@ -3137,6 +3149,11 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 		return ($.inArray(getExtension(filename), config.viewer.audio.extensions) !== -1);
 	};
 
+    // Test if file is supported by Only Office viewer
+    var isOnlyOfficeFile = function(filename) {
+        return ($.inArray(getExtension(filename), config.viewer.onlyoffice.extensions) !== -1);
+    };
+
 	// Test if file is openable in iframe
 	var isIFrameFile = function(filename) {
 		return ($.inArray(getExtension(filename), config.viewer.iframe.extensions) !== -1);
@@ -3315,25 +3332,91 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 
 	// Handle multiple actions in loop with deferred object
 	var processMultipleActions = function(items, callbackFunction, finishCallback) {
-		var successCounter = 0,
-			totalCounter = items.length,
-			deferred = $.Deferred().resolve();
+        var ProcessingLog = function() {
+            this.total = 0;
+            this.succeed = 0;
+            this.failure = 0;
+            this.processed = 0;
+
+            this.getProgress = function() {
+                return Math.round((this.processed / this.total) * 100);
+            };
+
+            this.getProgressSucceed = function() {
+                return Math.round((this.succeed / this.total) * 100);
+            };
+
+            this.getProgressFailure = function() {
+                return Math.round((this.failure / this.total) * 100);
+            };
+
+            this.getMessage = function() {
+                return lg('successful_processed').replace('%s', this.succeed).replace('%s', this.total);
+            };
+
+            this.succeeded = function() {
+                this.succeed++;
+                this.processed++;
+            };
+
+            this.failed = function() {
+                this.failure++;
+                this.processed++;
+            };
+
+            this.isProcessed = function() {
+                return this.processed === this.total;
+            };
+        };
+
+        var log,
+			process = new ProcessingLog(),
+            deferred = $.Deferred().resolve();
+
+        process.total = items.length;
+		if (process.total > 1) {
+            log = fm.write(process.getMessage(), {
+                delay: 0,
+                logMessageTemplate: function(message) {
+                    var progress = process.getProgress(),
+                        animateCss = process.isProcessed() ? 'striped' : 'striped animated';
+
+                    return '<div>' + message + '</div>' +
+                        '<div class="progress">' +
+							'<div class="progress-counter">' + process.getProgress() + '%</div>' +
+							'<div class="progress-bar ' + animateCss + '">' +
+								'<div class="progress-segment progress-succeed" style="width: ' + process.getProgressSucceed() + '%"></div>' +
+								'<div class="progress-segment progress-failure" style="width: ' + process.getProgressFailure() + '%"></div>' +
+							'</div>' +
+                        '</div>';
+                }
+            });
+            log.stick(true);
+		}
 
 		$.each(items, function(i, item) {
 			deferred = deferred.then(function() {
 				return callbackFunction(i, item);
 			}).then(function(result) {
 				if(result && result.data) {
-					successCounter++;
+					process.succeeded();
+				} else {
+                    process.failed();
 				}
+                if (log) {
+                    log.setMessage(process.getMessage());
+                }
 			});
 		});
 
-		if(totalCounter > 1) {
-			deferred.then(function() {
-				fm.write(lg('successful_processed').replace('%s', successCounter).replace('%s', totalCounter));
-			});
-		}
+		deferred.then(function() {
+			if (log && process.isProcessed()) {
+                log.stick(false);
+				setTimeout(function() {
+					log.remove();
+				}, 6000);
+			}
+		});
 
         deferred.then(function() {
             if (typeof finishCallback === 'function') {
@@ -3525,7 +3608,6 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 				if(config.security.extensions.policy == 'DISALLOW_LIST') {
 					str += '<p>' + lg('DISALLOWED_FILE_TYPE').replace('%s', config.security.extensions.restrictions.join(', ')) + '.</p>';
 				}
-				$("#filepath").val('');
 				fm.error(str);
 				return;
 			}
@@ -3719,6 +3801,12 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
                 var targetItem = response.data;
 
                 fmModel.removeItem(targetItem);
+
+                // ON delete currently open folder
+                if(fmModel.currentPath() === targetItem.id) {
+                    var parentFolder = getParentDirname(fmModel.currentPath());
+                    fmModel.itemsModel.loadList(parentFolder);
+                }
 
                 // ON delete currently previewed file
                 if(fmModel.previewFile() && fmModel.previewModel.rdo().id === targetItem.id) {
@@ -3998,9 +4086,6 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 
 		// Multiple Uploads
 		if(config.upload.multiple) {
-			// remove simple file upload element
-			$('#file-input-container').remove();
-
 			$uploadButton.unbind().click(function() {
 				if(capabilities.indexOf('upload') === -1) {
 					fm.error(lg('NOT_ALLOWED'));
@@ -4358,24 +4443,18 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 
 		// Simple Upload
 		} else {
+            $uploadButton.unbind().click(function() {
+                if(capabilities.indexOf('upload') === -1) {
+                    fm.error(lg('NOT_ALLOWED'));
+                    return false;
+                }
 
-			$uploadButton.click(function() {
-				if(capabilities.indexOf('upload') === -1) {
-					fm.error(lg('NOT_ALLOWED'));
-					return false;
-				}
-
-				var data = $(this).data();
-				if($.isEmptyObject(data)) {
-					fm.error(lg('upload_choose_file'));
-				} else {
-					data.submit();
-				}
+                $("#newfile").trigger('click');
 			});
 
 			$uploader
 				.fileupload({
-					autoUpload: false,
+					autoUpload: true,
 					dataType: 'json',
 					url: buildConnectorUrl(),
 					paramName: 'files',
@@ -4396,7 +4475,6 @@ $.richFilemanagerPlugin = function(element, pluginOptions)
 				})
 
 				.on('fileuploadalways', function(e, data) {
-					$("#filepath").val('');
 					$uploadButton.removeData().removeClass('loading').prop('disabled', false);
 					$uploadButton.children('span').text(lg('action_upload'));
 					var response = data.result;

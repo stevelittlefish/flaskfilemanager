@@ -58,7 +58,7 @@
         }
     },
     "upload": {
-        "multiple": true,
+        "multiple": false,
         "maxNumberOfFiles": 5,
         "chunkSize": false
     },
