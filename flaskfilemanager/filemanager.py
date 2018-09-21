@@ -245,8 +245,11 @@ def get_file(path=None, content=None):
     height = 0
     width = 0
     if extension in ['gif', 'jpg', 'jpeg', 'png']:
-        im = PIL.Image.open(os_file_path)
-        height, width = im.size
+        try:
+            im = PIL.Image.open(os_file_path)
+            height, width = im.size
+        except OSError:
+            log.exception('Error loading image "{}" to get width and height'.format(os_file_path))
     
     attributes = {
         'name': filename,
