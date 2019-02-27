@@ -1,7 +1,6 @@
 .ropeproject
 *.pyc
 MANIFEST
-dist
 *.swp
 flaskfilemanager.egg-info
 env
