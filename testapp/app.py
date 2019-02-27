@@ -5,6 +5,7 @@ App factory function
 import logging
 import datetime
 import traceback
+import os.path
 
 from flask import Flask, render_template
 import jinja2
@@ -49,7 +50,9 @@ def create_app():
 
     # Initialise the filemanager
     log.info('Initialising filemanager')
-    flaskfilemanager.init(app)
+    config_json_path = os.path.join(app.root_path, 'static/js/filemanager.config.json')
+    init_js_path = os.path.join(app.root_path, 'static/js/filemanager.init.js')
+    flaskfilemanager.init(app, custom_config_json_path=config_json_path, custom_init_js_path=init_js_path)
     
     @app.context_processor
     def add_global_context():
