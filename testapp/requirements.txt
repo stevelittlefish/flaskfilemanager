@@ -9,7 +9,7 @@ gunicorn==19.7.1
 idna==2.6
 IPy==0.83
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 littlefish==0.0.13
 lxml==4.1.0
 MarkupSafe==1.0
